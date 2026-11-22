@@ -6,6 +6,11 @@ Open source gaming optimizer for Windows 10/11.
 
 ![OpenGameBoost Screenshot](screenshot.png)
 
+## Changes in this fork
+
+- Game Mode skips `EscapeFromTarkov.exe` and `cs2.exe` when suspending processes.
+- Memory Optimization skips both game executables and honors additional exclusions from `memory.exclude_processes` in `config.json`.
+
 ## Overview
 
 OpenGameBoost is a transparent, open-source alternative to closed-source gaming optimization tools inspired by the recent Xilly (@x1lly) GameMode controversy. That tool faced malware accusations and a GitHub takedown despite clean VirusTotal scans and expert debunking. OpenGameBoost prioritizes full code transparency and auditability - no hidden functionality, no telemetry, no malware concerns.
@@ -47,8 +52,8 @@ Download `OpenGameBoost.exe` from Releases and run as Administrator.
 ### Option 2: Run from Source
 
 ```
-git clone https://github.com/opengameboost/opengameboost.git
-cd opengameboost
+git clone https://github.com/Harloys/OpenGameBoost.git
+cd OpenGameBoost
 pip install -r requirements.txt
 python main.py
 ```

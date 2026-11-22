@@ -8,6 +8,8 @@ from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
+PROTECTED_GAME_PROCESSES = frozenset({"escapefromtarkov.exe", "cs2.exe"})
+
 DEFAULT_CONFIG = {
     "general": {
         "start_minimized": False,

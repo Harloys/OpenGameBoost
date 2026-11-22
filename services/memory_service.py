@@ -5,9 +5,9 @@ Manages memory optimization by flushing unused memory from processes.
 import logging
 from typing import Optional, List, Tuple
 
-logger = logging.getLogger(__name__)
+from config import PROTECTED_GAME_PROCESSES
 
-DEFAULT_EXCLUDED_PROCESSES = frozenset({"escapefromtarkov.exe", "cs2.exe"})
+logger = logging.getLogger(__name__)
 
 
 class MemoryService:
@@ -110,7 +110,7 @@ class MemoryService:
         current_pid = self._psutil.Process().pid if exclude_current else None
         
         try:
-            excluded_processes = DEFAULT_EXCLUDED_PROCESSES.union(
+            excluded_processes = PROTECTED_GAME_PROCESSES.union(
                 name.lower() for name in self.exclude_processes
             )
             for proc in self._psutil.process_iter(['pid', 'name']):

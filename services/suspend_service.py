@@ -4,8 +4,10 @@ Suspends non-essential processes to free up CPU/RAM for gaming.
 This is the CORE functionality shown in the original software demo.
 """
 import logging
+from ntpath import basename
 from typing import List, Dict, Optional, Set
-import os
+
+from config import PROTECTED_GAME_PROCESSES
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +98,20 @@ class SuspendService:
             # Process access rights
             self.PROCESS_SUSPEND_RESUME = 0x0800
             self.PROCESS_QUERY_INFORMATION = 0x0400
+
+            self._kernel32.OpenProcess.argtypes = [
+                self._wintypes.DWORD, self._wintypes.BOOL, self._wintypes.DWORD
+            ]
+            self._kernel32.OpenProcess.restype = self._wintypes.HANDLE
+            self._kernel32.CloseHandle.argtypes = [self._wintypes.HANDLE]
+            self._kernel32.CloseHandle.restype = self._wintypes.BOOL
+
+            self._query_process_image = self._kernel32.QueryFullProcessImageNameW
+            self._query_process_image.argtypes = [
+                self._wintypes.HANDLE, self._wintypes.DWORD, self._wintypes.LPWSTR,
+                self._ctypes.POINTER(self._wintypes.DWORD),
+            ]
+            self._query_process_image.restype = self._wintypes.BOOL
             
             # NtSuspendProcess and NtResumeProcess
             self._NtSuspendProcess = self._ntdll.NtSuspendProcess
@@ -125,6 +141,15 @@ class SuspendService:
                 return False
             
             try:
+                # Verify the executable on the same handle used to suspend it.
+                image_path = self._ctypes.create_unicode_buffer(32768)
+                path_size = self._wintypes.DWORD(len(image_path))
+                if not self._query_process_image(handle, 0, image_path, self._ctypes.byref(path_size)):
+                    logger.warning("Skipping suspension because PID %s could not be identified", pid)
+                    return False
+                if basename(image_path.value).lower() in PROTECTED_GAME_PROCESSES:
+                    return False
+
                 result = self._NtSuspendProcess(handle)
                 if result == 0:  # STATUS_SUCCESS
                     self._suspended_pids.add(pid)
@@ -167,7 +192,7 @@ class SuspendService:
             return []
         
         pids = []
-        names_lower = [n.lower() for n in process_names]
+        names_lower = {name.lower() for name in process_names} - PROTECTED_GAME_PROCESSES
         
         try:
             for proc in self._psutil.process_iter(['pid', 'name']):
@@ -344,6 +369,8 @@ class SuspendService:
                     if not name:
                         continue
                     name_lower = name.lower()
+                    if name_lower in PROTECTED_GAME_PROCESSES:
+                        continue
                     
                     if name_lower in [p.lower() for p in BROWSER_PROCESSES]:
                         if name not in result["browsers"]:
