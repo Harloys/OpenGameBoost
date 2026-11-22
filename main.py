@@ -231,6 +231,9 @@ class OpenGameBoostApp:
         
         if self.memory_service:
             self.memory_service.enabled = self.config.get("memory", "enabled", True)
+            self.memory_service.set_excluded_processes(
+                self.config.get("memory", "exclude_processes", [])
+            )
         
         if self.network_service:
             self.network_service.enabled = self.config.get("network", "enabled", True)

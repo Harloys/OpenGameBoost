@@ -7,6 +7,8 @@ from typing import Optional, List, Tuple
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_EXCLUDED_PROCESSES = frozenset({"escapefromtarkov.exe", "cs2.exe"})
+
 
 class MemoryService:
     """Service to optimize system memory usage."""
@@ -108,6 +110,9 @@ class MemoryService:
         current_pid = self._psutil.Process().pid if exclude_current else None
         
         try:
+            excluded_processes = DEFAULT_EXCLUDED_PROCESSES.union(
+                name.lower() for name in self.exclude_processes
+            )
             for proc in self._psutil.process_iter(['pid', 'name']):
                 try:
                     pid = proc.info['pid']
@@ -118,7 +123,7 @@ class MemoryService:
                         continue
                     
                     # Skip excluded processes
-                    if name and name.lower() in [p.lower() for p in self.exclude_processes]:
+                    if name and name.lower() in excluded_processes:
                         continue
                     
                     if self.empty_working_set(pid):
