@@ -373,7 +373,7 @@ class OpenGameBoostApp:
         self._create_toggle_row_compact(
             left_frame, "Suspend Launchers",
             self.suspend_launchers_var,
-            desc="Pause Steam, Epic, etc."
+            desc="Pause Epic, Battle.net, etc."
         )
         
         # Toggle: Memory Optimization

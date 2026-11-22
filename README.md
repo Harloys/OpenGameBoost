@@ -9,6 +9,7 @@ Open source gaming optimizer for Windows 10/11.
 ## Changes in this fork
 
 - Game Mode skips `EscapeFromTarkov.exe` and `cs2.exe` when suspending processes.
+- **Suspend Launchers** keeps `steam.exe`, `steamwebhelper.exe`, and `steamservice.exe` running so CS2 can use Steam even when Game Mode starts first.
 - Memory Optimization skips both game executables and honors additional exclusions from `memory.exclude_processes` in `config.json`.
 
 ## Overview
@@ -21,7 +22,7 @@ OpenGameBoost is a transparent, open-source alternative to closed-source gaming 
 
 - **Suspend Explorer** - Suspends explorer.exe to free CPU and RAM
 - **Suspend Browsers** - Suspends Chrome, Firefox, Edge, Opera, Brave, and other browsers
-- **Suspend Launchers** - Suspends Steam, Epic Games, Battle.net, EA, Ubisoft Connect, GOG, and other game launchers
+- **Suspend Launchers** - Suspends Epic Games, Battle.net, EA, Ubisoft Connect, GOG, and other game launchers
 
 All processes are suspended (not killed) and resume instantly when Game Mode is deactivated.
 

@@ -11,6 +11,11 @@ from config import PROTECTED_GAME_PROCESSES
 
 logger = logging.getLogger(__name__)
 
+# Steam must stay responsive even when Game Mode is enabled before CS2 starts.
+SUSPENSION_EXCLUDED_PROCESSES = PROTECTED_GAME_PROCESSES | {
+    "steam.exe", "steamwebhelper.exe", "steamservice.exe",
+}
+
 # Process categories for suspension
 BROWSER_PROCESSES = [
     "chrome.exe", "firefox.exe", "msedge.exe", "opera.exe", "brave.exe",
@@ -20,8 +25,6 @@ BROWSER_PROCESSES = [
 ]
 
 LAUNCHER_PROCESSES = [
-    # Steam
-    "steam.exe", "steamwebhelper.exe", "steamservice.exe",
     # Epic Games
     "EpicGamesLauncher.exe", "EpicWebHelper.exe",
     # Battle.net
@@ -147,7 +150,7 @@ class SuspendService:
                 if not self._query_process_image(handle, 0, image_path, self._ctypes.byref(path_size)):
                     logger.warning("Skipping suspension because PID %s could not be identified", pid)
                     return False
-                if basename(image_path.value).lower() in PROTECTED_GAME_PROCESSES:
+                if basename(image_path.value).lower() in SUSPENSION_EXCLUDED_PROCESSES:
                     return False
 
                 result = self._NtSuspendProcess(handle)
@@ -192,7 +195,7 @@ class SuspendService:
             return []
         
         pids = []
-        names_lower = {name.lower() for name in process_names} - PROTECTED_GAME_PROCESSES
+        names_lower = {name.lower() for name in process_names} - SUSPENSION_EXCLUDED_PROCESSES
         
         try:
             for proc in self._psutil.process_iter(['pid', 'name']):
@@ -369,7 +372,7 @@ class SuspendService:
                     if not name:
                         continue
                     name_lower = name.lower()
-                    if name_lower in PROTECTED_GAME_PROCESSES:
+                    if name_lower in SUSPENSION_EXCLUDED_PROCESSES:
                         continue
                     
                     if name_lower in [p.lower() for p in BROWSER_PROCESSES]:
